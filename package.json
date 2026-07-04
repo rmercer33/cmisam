@@ -21,6 +21,10 @@
             "**/__tests__/**/*.mjs?(x)",
             "**/?(*.)+(spec|test).mjs?(x)"
         ],
+        "testPathIgnorePatterns": [
+            "/node_modules/",
+            "/.aws-sam/"
+        ],
         "moduleFileExtensions": [
             "mjs",
             "js"

@@ -3,6 +3,8 @@
 // Create a DocumentClient that represents the query to add an item
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { filterItemsByText } from "../utils/searchFilter.mjs";
+
 const client = new DynamoDBClient({
   endpoint: "http://local-dynamodb:8000",
 });
@@ -27,7 +29,8 @@ export const searchHandler = async (event) => {
   const body = JSON.parse(event.body);
   const source = body.source;
   const query = body.query;
-  //const strict = body.strict;
+  const strict = body.strict;
+  const width = body.width;
 
   if (!source || !query) {
     return {
@@ -39,7 +42,7 @@ export const searchHandler = async (event) => {
 
   // Creates a new item, or replaces an old item with a new item
   // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/DynamoDB/DocumentClient.html#put-property
-  var queryParams = {
+  const queryParams = {
     TableName: tableName,
     KeyConditionExpression: "#sourceAttr = :sourceValue",
     ExpressionAttributeNames: {
@@ -51,14 +54,35 @@ export const searchHandler = async (event) => {
   };
 
   try {
-    const command = new QueryCommand(queryParams);
-    const response = await ddbDocClient.send(command);
-    console.log("Found %s matches", response.Items.length);
+    let accumulatedItems = [];
+    let lastEvaluatedKey = undefined;
+
+    do {
+      const activeParams = {
+        ...queryParams,
+        ExclusiveStartKey: lastEvaluatedKey,
+      };
+      const command = new QueryCommand(activeParams);
+      const response = await ddbDocClient.send(command);
+
+      if (response.Items) {
+        accumulatedItems.push(...response.Items);
+      }
+      lastEvaluatedKey = response.LastEvaluatedKey;
+    } while (lastEvaluatedKey);
+
+    console.log(
+      "Found %s total database records before filtering",
+      accumulatedItems.length,
+    );
+
+    const filteredItems = filterItemsByText(accumulatedItems, query, strict, width);
+    console.log("Found %s matches after filtering", filteredItems.length);
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ results: response.Items }),
+      body: JSON.stringify({ results: filteredItems }),
     };
   } catch (err) {
     console.error("Error executing query:", err);
