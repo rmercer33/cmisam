@@ -3,7 +3,7 @@
  * Removes any character that is not a word character or whitespace (and removes underscores).
  */
 const normalizeText = (str) => {
-  return str.toLowerCase().replace(/[^\w\s]|_/g, '');
+  return str.toLowerCase().replace(/[^\w\s]|_/g, "");
 };
 
 /**
@@ -31,7 +31,7 @@ const getOriginalIndices = (originalText, normalizedQuery, strictRegex) => {
 
   for (let i = 0; i < originalText.length; i++) {
     const char = originalText[i];
-    const isPreserved = !(/[^\w\s]|_/.test(char));
+    const isPreserved = !/[^\w\s]|_/.test(char);
 
     if (isPreserved) {
       if (normIdx === matchStart && origStart === -1) {
@@ -64,15 +64,26 @@ const getOriginalIndices = (originalText, normalizedQuery, strictRegex) => {
  * @param {number} [width=30] - The desired width of the context snippet.
  * @returns {Array} - The filtered array of items.
  */
-export const filterItemsByText = (items = [], query = "", strict = false, width = 30) => {
+export const filterItemsByText = (
+  items = [],
+  query = "",
+  strict = false,
+  width = 30,
+) => {
   if (!query) return items;
 
-  console.log("filter(): %s items containing: %s (strict: %s, width: %s)", items.length, query, strict, width);
+  console.log(
+    "filter(): %s items containing: %s (strict: %s, width: %s)",
+    items.length,
+    query,
+    strict,
+    width,
+  );
 
   const normalizedQuery = normalizeText(query);
   const strictRegex = strict ? new RegExp(`\\b${normalizedQuery}\\b`) : null;
 
-  let parsedWidth = typeof width === 'number' ? width : 30;
+  let parsedWidth = typeof width === "number" ? width : 30;
   if (query.length > parsedWidth) {
     parsedWidth = query.length;
   }
@@ -80,7 +91,7 @@ export const filterItemsByText = (items = [], query = "", strict = false, width 
   return items.filter((item) => {
     if (item.text && typeof item.text === "string") {
       const normalizedItemText = normalizeText(item.text);
-      
+
       let hasMatch = false;
       if (strict) {
         hasMatch = strictRegex.test(normalizedItemText);
@@ -90,7 +101,11 @@ export const filterItemsByText = (items = [], query = "", strict = false, width 
 
       if (!hasMatch) return false;
 
-      const indices = getOriginalIndices(item.text, normalizedQuery, strictRegex);
+      const indices = getOriginalIndices(
+        item.text,
+        normalizedQuery,
+        strictRegex,
+      );
       if (!indices) {
         return true;
       }
@@ -108,7 +123,7 @@ export const filterItemsByText = (items = [], query = "", strict = false, width 
       if (startIdx === 0) {
         endIdx = Math.min(item.text.length, endIdx + (padLeft - origStart));
       } else if (endIdx === item.text.length) {
-        const overflowRight = (origEnd + padRight) - item.text.length;
+        const overflowRight = origEnd + padRight - item.text.length;
         startIdx = Math.max(0, startIdx - overflowRight);
       }
 

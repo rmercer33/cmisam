@@ -8,7 +8,7 @@ ENDPOINT="http://localhost:8000"
 REGION="us-east-1"
 
 PARTITION_KEY_NAME="source" # Replace with your actual Partition Key name
-SORT_KEY_NAME="parakey"     # Replace with your actual Sort Key name
+SORT_KEY_NAME="sk"     # Replace with your actual Sort Key name
 
 # Target values
 TARGET_PARTITION_VAL="raj"

@@ -75,12 +75,12 @@ Make sure you have the following tools installed on your host system:
    ```
 
 3. **Verify/Create the Local DynamoDB Table:**
-   Create the table `cmiSearch` with `source` as the Hash key (Partition Key) and `parakey` as the Range key (Sort Key):
+   Create the table `cmiSearch` with `source` as the Hash key (Partition Key) and `sk` as the Range key (Sort Key):
    ```bash
    aws dynamodb create-table \
      --table-name cmiSearch \
-     --attribute-definitions AttributeName=source,AttributeType=S AttributeName=parakey,AttributeType=S \
-     --key-schema AttributeName=source,KeyType=HASH AttributeName=parakey,KeyType=RANGE \
+     --attribute-definitions AttributeName=source,AttributeType=S AttributeName=sk,AttributeType=S \
+     --key-schema AttributeName=source,KeyType=HASH AttributeName=sk,KeyType=RANGE \
      --billing-mode PAY_PER_REQUEST \
      --endpoint-url http://127.0.0.1:8000 \
      --region us-east-1

@@ -10,9 +10,9 @@ describe('Test searchHandler', function () {
     });
 
     it('should query the table and return filtered items matching the query', async () => {
-        const item1 = { source: 'ftcm', parakey: '1801', text: 'this is matching 1801 text' };
-        const item2 = { source: 'ftcm', parakey: '1802', text: 'this does not match' };
-        const item3 = { source: 'ftcm', parakey: '1803' }; // missing text attribute
+        const item1 = { source: 'ftcm', sk: '1801', text: 'this is matching 1801 text' };
+        const item2 = { source: 'ftcm', sk: '1802', text: 'this does not match' };
+        const item3 = { source: 'ftcm', sk: '1803' }; // missing text attribute
 
         ddbMock.on(QueryCommand).resolves({
             Items: [item1, item2, item3]
@@ -35,14 +35,14 @@ describe('Test searchHandler', function () {
     });
 
     it('should query multiple pages and accumulate items when LastEvaluatedKey is present', async () => {
-        const item1 = { source: 'ftcm', parakey: '1801', text: 'this is matching 1801 text' };
-        const item2 = { source: 'ftcm', parakey: '1802', text: 'second page matching 1801' };
+        const item1 = { source: 'ftcm', sk: '1801', text: 'this is matching 1801 text' };
+        const item2 = { source: 'ftcm', sk: '1802', text: 'second page matching 1801' };
 
         // Mock two consecutive paginated query responses
         ddbMock.on(QueryCommand)
             .resolvesOnce({
                 Items: [item1],
-                LastEvaluatedKey: { source: 'ftcm', parakey: '1801' }
+                LastEvaluatedKey: { source: 'ftcm', sk: '1801' }
             })
             .resolvesOnce({
                 Items: [item2],
@@ -66,7 +66,7 @@ describe('Test searchHandler', function () {
     });
 
     it('should match case-insensitively when user query contains uppercase characters', async () => {
-        const item = { source: 'ftcm', parakey: '1801', text: 'this has matches' };
+        const item = { source: 'ftcm', sk: '1801', text: 'this has matches' };
 
         ddbMock.on(QueryCommand).resolves({
             Items: [item]
@@ -115,8 +115,8 @@ describe('Test searchHandler', function () {
     });
 
     it('should support strict whole-word match when strict parameter is true', async () => {
-        const item1 = { source: 'ftcm', parakey: '1', text: 'day is light' };
-        const item2 = { source: 'ftcm', parakey: '2', text: 'today is light' };
+        const item1 = { source: 'ftcm', sk: '1', text: 'day is light' };
+        const item2 = { source: 'ftcm', sk: '2', text: 'today is light' };
 
         ddbMock.on(QueryCommand).resolves({
             Items: [item1, item2]
